@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 public class HiddenWords {
     static Node root;
     static boolean[][] visited;
-    static char[][] grid;
+    static String[][] grid;
     static int rows;
     static int cols;
     static int nwords;
@@ -14,15 +14,12 @@ public class HiddenWords {
         Kattio in = new Kattio(System.in, System.out);
         rows = in.getInt();
         cols = in.getInt();
-
         root = new Node();
-
-        grid = new char[rows][cols];
+        grid = new String[rows][cols];
         for (int i = 0; i < rows; i++) {
-            String word = in.getWord();
-            char[] arr = word.toCharArray();
+            String[] word = in.getWord().split("");
             for (int j = 0; j < cols; j++) {
-                grid[i][j] = arr[j];
+                grid[i][j] = word[j];
             }
         }
 
@@ -35,10 +32,8 @@ public class HiddenWords {
 
         nwords = in.getInt();
         int result = 0;
-
         for (int i = 0; i < nwords; i++) {
             w = in.getWord();
-
             if (search(root, w)) {
                 result++;
             }
@@ -47,15 +42,12 @@ public class HiddenWords {
         in.close();
     }
 
-    private static void addToTrie(Node current, char c, int row, int col) {
-
-        current = insert(current, c);
+    private static void addToTrie(Node current, String c, int row, int col) {
+        current = insert(current, c.charAt(0));
         if (current.depth == 10) {
             return;
         }
-
         visited[row][col] = true;
-
         //up
         if (row - 1 >= 0 && !visited[row - 1][col]) {
             addToTrie(current, grid[row - 1][col], row-1, col);
@@ -72,56 +64,38 @@ public class HiddenWords {
             addToTrie(current, grid[row][col - 1], row, col - 1);
         }
         visited[row][col] = false;
-
     }
 
     static boolean search (Node current, String word) {
-
         if (word.isEmpty()) {
             return false;
         }
-
         int index = word.charAt(0) - 'A';
-
         if (current.children[index] == null) {
             return false;
         }
-
-        current = current.children[index];
-        if (current.word.equals(w)) {
+        if (current.children[index].depth == w.length()) {
             return true;
         } else
-        return search(current, word.substring(1));
-
+        return search(current.children[index], word.substring(1));
     }
 
-
     static Node insert (Node current, char c) {
-
         int index = c - 'A';
-        String s = Character.toString(c);
-
         if (current.children[index] == null) {
-            Node node = new Node(s, current.word + s);
-            current.children[index] = node;
-            current.children[index].depth = current.depth + 1;
-            return node;
+            return current.children[index] = new Node(current.depth + 1);
         } else {
             return current.children[index];
         }
-
     }
 
     static class Node {
-        String s;
-        String word = "";
         Node[] children;
         int depth = 0;
 
-        Node(String s, String word) {
-            this.s = s;
-            this.word = word;
-            children = new Node[26];
+        Node (int depth) {
+            this.depth = depth;
+            this.children = new Node[26];
         }
 
         Node() {
@@ -184,8 +158,6 @@ public class HiddenWords {
             String ans = peekToken();
             token = null;
             return ans;
-
-
         }
     }
 }
